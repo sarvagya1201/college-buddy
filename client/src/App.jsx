@@ -1,13 +1,23 @@
 import { useState } from 'react'
 import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import { AuthProvider } from "./context/authContext.jsx";
+
 
 function App() {
   
 
   return (
-    <div className="p-6 text-xl font-bold text-blue-500">
-      College Buddy - Coming Soon!
-    </div>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   )
 }
 

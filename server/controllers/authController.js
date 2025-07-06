@@ -10,7 +10,8 @@ export const register = async (req, res) => {
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) return res.status(400).json({ error: "Email already registered" });
+    if (existingUser)
+      return res.status(400).json({ error: "Email already registered" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -23,7 +24,12 @@ export const register = async (req, res) => {
       },
     });
 
-    res.status(201).json({ message: "User registered successfully", user: { id: user.id, name: user.name, email: user.email } });
+    res
+      .status(201)
+      .json({
+        message: "User registered successfully",
+        user: { id: user.id, name: user.name, email: user.email },
+      });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Registration failed" });
@@ -36,23 +42,30 @@ export const login = async (req, res) => {
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(400).json({ error: "Invalid email or password" });
+    if (!user)
+      return res.status(400).json({ error: "Invalid email or password" });
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) return res.status(400).json({ error: "Invalid email or password" });
+    if (!isMatch)
+      return res.status(400).json({ error: "Invalid email or password" });
 
-    const token = jwt.sign({  userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
-
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
+      expiresIn: "7d",
     });
+
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      })
+      .json({ message: "Login successful" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Login failed" });
   }
+};
+export const logout = (req, res) => {
+  res.clearCookie("token").json({ message: "Logged out successfully" });
 };
