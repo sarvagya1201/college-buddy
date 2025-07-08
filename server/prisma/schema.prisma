@@ -18,5 +18,55 @@ model User {
   email        String   @unique
   passwordHash String
   role         String   @default("student")
+  reviews      Review[]
   createdAt    DateTime @default(now())
+}
+model Department {
+  id         String       @id @default(uuid())
+  name       String       @unique
+  code       String       @unique
+  courses    Course[]
+  professors Professor[]
+}
+model Professor {
+  id           String     @id @default(uuid())
+  name         String
+  email        String?    @unique
+  departmentId String
+
+  department   Department @relation(fields: [departmentId], references: [id])
+  courses      Course[]
+}
+model Course {
+  id           String     @id @default(uuid())
+  name         String
+  code         String     @unique
+  courseType   String     // e.g., "Open Elective"
+  offeredIn    String[]   // e.g., ["monsoon", "winter"]
+
+  departmentId String
+  professorId  String
+
+  department   Department @relation(fields: [departmentId], references: [id])
+  professor    Professor  @relation(fields: [professorId], references: [id])
+  reviews      Review[]
+
+  createdAt    DateTime   @default(now())
+}
+model Review {
+  id               String   @id @default(uuid())
+  reviewText       String
+  materialRating   Int
+  gradingRating    Int
+  attendanceRating Int
+  profRating       Int
+  overallRating    Float    // derived
+  userId           String
+  courseId         String
+
+  user    User    @relation(fields: [userId], references: [id])
+  course  Course  @relation(fields: [courseId], references: [id])
+
+  createdAt DateTime @default(now())
+  @@unique([userId, courseId])
 }
