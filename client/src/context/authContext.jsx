@@ -1,39 +1,55 @@
-import { createContext, useState, useContext, useEffect } from "react";
-import api from "../api/axios"; // Axios withCredentials: true
+// client/src/context/authContext.jsx
+import { createContext, useEffect, useState } from "react";
+import api from "../api/axios";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export default function AuthProvider({ children }) {
   const [authenticated, setAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(null);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [loading, setLoading] = useState(true);
 
-  // Check auth on initial load
+  // Attach token to every request header
+  api.interceptors.request.use((config) => {
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  });
+
   useEffect(() => {
-    const verifyToken = async () => {
+    const fetchMe = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await api.get("/auth/me"); // backend route to return user info if cookie is valid
+        const res = await api.get("/auth/me");
+        setUser(res.data);
         setAuthenticated(true);
-        setUserRole(res.data.role); // { role: "student" }
-      } catch (err) {
+      } catch {
         setAuthenticated(false);
-        setUserRole(null);
+        setUser(null);
+        localStorage.removeItem("token");
+        setToken(null);
+      } finally {
+        setLoading(false);
       }
     };
+    fetchMe();
+  }, [token]);
 
-    verifyToken();
-  }, []);
-
-  const logout = async () => {
-    await api.post("/auth/logout");
+  const logout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
     setAuthenticated(false);
-    setUserRole(null);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ authenticated, userRole, logout }}>
-      {children}
+    <AuthContext.Provider
+      value={{ authenticated, user, token, setAuthenticated, setToken, logout }}
+    >
+      {!loading && children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => useContext(AuthContext);
+}
