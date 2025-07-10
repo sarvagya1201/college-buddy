@@ -1,5 +1,5 @@
 // client/src/pages/DepartmentCourses.jsx
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import Layout from "../components/Layout";
@@ -7,6 +7,7 @@ import Layout from "../components/Layout";
 export default function DepartmentCourses() {
   const { code } = useParams();
   const [courses, setCourses] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -23,9 +24,18 @@ export default function DepartmentCourses() {
         <div className="grid gap-4">
           {courses.map((course) => (
             <div key={course.id} className="bg-white p-4 shadow rounded">
-              <h2 className="text-lg font-bold text-blue-700">{course.name}</h2>
-              <p className="text-sm text-gray-700">Professor: {course.professor.name}</p>
-              <p className="text-sm text-gray-700">Dept: {course.department.name}</p>
+              <h2
+                className="text-lg font-bold text-blue-700 cursor-pointer"
+                onClick={() => navigate(`/courses/${course.id}`)}
+              >
+                {course.name}
+              </h2>
+              <p className="text-sm text-gray-700">
+                Professor: {course.professor.name}
+              </p>
+              <p className="text-sm text-gray-700">
+                Dept: {course.department.name}
+              </p>
             </div>
           ))}
         </div>
