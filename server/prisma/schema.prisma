@@ -12,6 +12,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
   id           String   @id @default(uuid())
   name         String
@@ -19,54 +20,71 @@ model User {
   passwordHash String
   role         String   @default("student")
   reviews      Review[]
+  notes        Note[]
   createdAt    DateTime @default(now())
 }
+
 model Department {
-  id         String       @id @default(uuid())
-  name       String       @unique
-  code       String       @unique
+  id         String      @id @default(uuid())
+  name       String      @unique
+  code       String      @unique
   courses    Course[]
   professors Professor[]
 }
+
 model Professor {
-  id           String     @id @default(uuid())
+  id           String  @id @default(uuid())
   name         String
-  email        String?    @unique
+  email        String? @unique
   departmentId String
 
-  department   Department @relation(fields: [departmentId], references: [id])
-  courses      Course[]
+  department Department @relation(fields: [departmentId], references: [id])
+  courses    Course[]
 }
+
 model Course {
-  id           String     @id @default(uuid())
-  name         String
-  code         String     @unique
-  courseType   String     // e.g., "Open Elective"
-  offeredIn    String[]   // e.g., ["monsoon", "winter"]
+  id         String   @id @default(uuid())
+  name       String
+  code       String   @unique
+  courseType String // e.g., "Open Elective"
+  offeredIn  String[] // e.g., ["monsoon", "winter"]
 
   departmentId String
   professorId  String
 
-  department   Department @relation(fields: [departmentId], references: [id])
-  professor    Professor  @relation(fields: [professorId], references: [id])
-  reviews      Review[]
-
-  createdAt    DateTime   @default(now())
+  department Department @relation(fields: [departmentId], references: [id])
+  professor  Professor  @relation(fields: [professorId], references: [id])
+  reviews    Review[]
+  notes      Note[]
+  createdAt  DateTime   @default(now())
 }
+
 model Review {
-  id               String   @id @default(uuid())
+  id               String @id @default(uuid())
   reviewText       String
   materialRating   Int
   gradingRating    Int
   attendanceRating Int
   profRating       Int
-  overallRating    Float    // derived
+  overallRating    Float // derived
   userId           String
   courseId         String
 
-  user    User    @relation(fields: [userId], references: [id])
-  course  Course  @relation(fields: [courseId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
 
   createdAt DateTime @default(now())
+
   @@unique([userId, courseId])
+}
+
+model Note {
+  id         String   @id @default(uuid())
+  title      String
+  fileUrl    String
+  uploadedBy User     @relation(fields: [userId], references: [id])
+  userId     String
+  course     Course   @relation(fields: [courseId], references: [id])
+  courseId   String
+  createdAt  DateTime @default(now())
 }
