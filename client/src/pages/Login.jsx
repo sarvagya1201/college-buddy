@@ -21,7 +21,7 @@ export default function Login() {
       setToken(res.data.token);
       setAuthenticated(true);
       // 2️⃣ redirect
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       if (!err.response) return setMsg("Server unreachable");
       const { status, data } = err.response;

@@ -20,3 +20,13 @@ export const createDepartment = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+export const getAllDepartments = async (req, res) => {
+  try {
+    const departments = await prisma.department.findMany();
+    res.json(departments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error fetching departments" });
+  }
+};
+
