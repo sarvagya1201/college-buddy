@@ -2,7 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../models/prismaClient.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+// Don't assign JWT_SECRET at module level - do it inside functions
+// const JWT_SECRET = process.env.JWT_SECRET;
 
 // Register
 export const register = async (req, res) => {
@@ -20,7 +21,7 @@ export const register = async (req, res) => {
         name,
         email,
         passwordHash: hashedPassword,
-        role: "student", // <== explicitly added, even though it's default
+        role: "student",
       },
     });
 
@@ -41,6 +42,14 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Get JWT_SECRET inside the function where it's needed
+    const JWT_SECRET = process.env.JWT_SECRET;
+    
+    if (!JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in environment variables!");
+      return res.status(500).json({ error: "Server configuration error" });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user)
       return res.status(400).json({ error: "Invalid email or password" });
@@ -66,6 +75,7 @@ export const login = async (req, res) => {
     res.status(500).json({ error: "Login failed" });
   }
 };
+
 export const logout = (req, res) => {
   res.clearCookie("token").json({ message: "Logged out successfully" });
 };

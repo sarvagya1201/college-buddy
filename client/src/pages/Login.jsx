@@ -1,6 +1,5 @@
 import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api from "../api/axios";
 import { AuthContext } from "../context/authContext";
 
 export default function Login() {
@@ -8,26 +7,21 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState(null);
   const navigate = useNavigate();
-  const { setAuthenticated, setToken } = useContext(AuthContext);
+  const { login } = useContext(AuthContext); // use login function from context
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg(null);
 
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      // 1️⃣ store token (localStorage + context)
-      localStorage.setItem("token", res.data.token);
-      setToken(res.data.token);
-      setAuthenticated(true);
-      // 2️⃣ redirect
+    const res = await login(email, password);
+    if (res.success) {
       navigate("/home");
-    } catch (err) {
-      if (!err.response) return setMsg("Server unreachable");
-      const { status, data } = err.response;
-      if (status === 404) setMsg("User doesn’t exist");
-      else if (status === 401) setMsg("Incorrect password");
-      else setMsg(data?.error || "Login failed");
+    } else {
+      const err = res.error;
+      if (err === "User not found") setMsg("User doesn’t exist");
+      else if (err === "Incorrect password") setMsg("Incorrect password");
+      else if (err === "Network Error") setMsg("Server unreachable");
+      else setMsg(err);
     }
   };
 
