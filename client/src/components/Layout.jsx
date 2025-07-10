@@ -57,7 +57,7 @@ export default function Layout({ children }) {
 
       {/* Footer */}
       <footer className="text-center text-sm font-bold text-gray-600 py-4 border-t bg-white">
-        © {new Date().getFullYear()} Built with ❤️ by Bala & Landvagya
+        © {new Date().getFullYear()} Built with ❤️ by Bhosda Bala & Landvagya
       </footer>
     </div>
   );
