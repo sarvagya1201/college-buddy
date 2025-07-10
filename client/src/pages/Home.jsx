@@ -21,6 +21,7 @@ export default function Home() {
     };
     fetchCourses();
   }, []);
+  const navigate = useNavigate();
 
   const getRating = (course) => {
     return course.ratings?.[filter] || 0;
@@ -51,11 +52,19 @@ export default function Home() {
         <div className="grid gap-4">
           {sorted.map((course, i) => (
             <div key={course.id} className="bg-white p-4 shadow rounded">
-              <h2 className="text-xl font-bold text-blue-700">
+              <h2
+                className="text-xl font-bold text-blue-700 cursor-pointer"
+                onClick={() => navigate(`/courses/${course.id}`)}
+              >
                 #{i + 1} – {course.name}
               </h2>
-              <p className="text-sm text-gray-700">Professor: {course.professor.name}</p>
-              <p className="text-sm text-gray-700">Dept: {course.department.name}</p>
+
+              <p className="text-sm text-gray-700">
+                Professor: {course.professor.name}
+              </p>
+              <p className="text-sm text-gray-700">
+                Dept: {course.department.name}
+              </p>
               {course.ratings && (
                 <ul className="text-sm mt-2">
                   <li>Overall: {course.ratings.overall.toFixed(2)}</li>

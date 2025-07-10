@@ -1,4 +1,4 @@
-import  prisma  from "../models/prismaClient.js";
+import prisma from "../models/prismaClient.js";
 
 // GET /api/courses?dept=ECE&courseType=Open Elective
 export const getAllCourses = async (req, res) => {
@@ -10,7 +10,7 @@ export const getAllCourses = async (req, res) => {
         AND: [
           dept ? { department: { code: dept } } : {},
           courseType ? { courseType } : {},
-          offeredIn ? { offeredIn: { has: offeredIn } } : {}
+          offeredIn ? { offeredIn: { has: offeredIn } } : {},
         ],
       },
       include: {
@@ -20,15 +20,15 @@ export const getAllCourses = async (req, res) => {
       },
     });
 
-    const formatted = courses.map(course => {
+    const formatted = courses.map((course) => {
       const reviewCount = course.reviews.length;
       const avgRatings = reviewCount
         ? {
-            material: average(course.reviews.map(r => r.materialRating)),
-            grading: average(course.reviews.map(r => r.gradingRating)),
-            attendance: average(course.reviews.map(r => r.attendanceRating)),
-            prof: average(course.reviews.map(r => r.profRating)),
-            overall: average(course.reviews.map(r => r.overallRating)),
+            material: average(course.reviews.map((r) => r.materialRating)),
+            grading: average(course.reviews.map((r) => r.gradingRating)),
+            attendance: average(course.reviews.map((r) => r.attendanceRating)),
+            prof: average(course.reviews.map((r) => r.profRating)),
+            overall: average(course.reviews.map((r) => r.overallRating)),
           }
         : null;
 
@@ -48,21 +48,57 @@ export const getAllCourses = async (req, res) => {
 
 // GET /api/courses/:id
 export const getCourseById = async (req, res) => {
+  const { id } = req.params;
+
   try {
     const course = await prisma.course.findUnique({
-      where: { id: req.params.id },
+      where: { id },
       include: {
-        department: true,
         professor: true,
-        reviews: {
-          include: { user: true },
+        department: true,
+        reviews: true,
+        notes: {
+          include: {
+            uploadedBy: true,
+          },
         },
       },
     });
+
     if (!course) return res.status(404).json({ error: "Course not found" });
-    res.json(course);
+
+    // Calculate average ratings
+    const total = course.reviews.length;
+    let avg = {
+      overall: 0,
+      attendance: 0,
+      grading: 0,
+      material: 0,
+      prof: 0,
+    };
+
+    if (total > 0) {
+      for (const r of course.reviews) {
+        avg.overall += r.overallRating;
+        avg.attendance += r.attendanceRating;
+        avg.grading += r.gradingRating;
+        avg.material += r.materialRating;
+        avg.prof += r.profRating;
+      }
+
+      for (const key in avg) {
+        avg[key] = avg[key] / total;
+      }
+    }
+
+    // Attach computed ratings to response
+    res.json({
+      ...course,
+      ratings: avg,
+    });
   } catch (err) {
-    res.status(500).json({ error: "Error getting course" });
+    console.error("Error fetching course details:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -123,12 +159,12 @@ export const getCourseDetails = async (req, res) => {
             user: {
               select: {
                 id: true,
-                name: true
-              }
-            }
-          }
-        }
-      }
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!course) {
@@ -138,9 +174,9 @@ export const getCourseDetails = async (req, res) => {
     // Calculate average ratings
     const total = course.reviews.length;
     let sumMaterial = 0,
-        sumGrading = 0,
-        sumAttendance = 0,
-        sumProf = 0;
+      sumGrading = 0,
+      sumAttendance = 0,
+      sumProf = 0;
 
     course.reviews.forEach((rev) => {
       sumMaterial += rev.materialRating;

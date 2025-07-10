@@ -9,7 +9,7 @@ import Home from "./pages/Home.jsx";
 import Departments from "./pages/Departments";
 import DepartmentCourses from "./pages/DepartmentCourses";
 import Professors from "./pages/Professors";
-
+import CourseDetail from "./pages/CourseDetails.jsx";
 
 function App() {
   
@@ -26,6 +26,7 @@ function App() {
           <Route path="/departments" element={<Departments />} />
           <Route path="/departments/:code" element={<DepartmentCourses />} />
           <Route path="/professors" element={<Professors />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
 
         </Routes>
       </Router>
