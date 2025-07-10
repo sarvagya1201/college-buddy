@@ -1,3 +1,4 @@
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -10,9 +11,9 @@ import professorRoutes from "./routes/professorRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 
-
-dotenv.config();
+// Remove dotenv.config() from here since it's now in index.js
 const app = express();
+
 app.use(
   cors({
     origin: "http://localhost:5173", // frontend origin
