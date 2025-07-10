@@ -27,3 +27,14 @@ export const createProfessor = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+export const getAllProfessors = async (req, res) => {
+  try {
+    const professors = await prisma.professor.findMany({
+      include: { department: true },
+    });
+    res.json(professors);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error fetching professors" });
+  }
+};
