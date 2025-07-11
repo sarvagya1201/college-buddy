@@ -11,6 +11,10 @@ import DepartmentCourses from "./pages/DepartmentCourses";
 import Professors from "./pages/Professors";
 import CourseDetail from "./pages/CourseDetails.jsx";
 import Landing from "./pages/Landing.jsx";
+import AdminControls from "./pages/admin/AdminControls.jsx";
+import ManageCourses from "./pages/admin/ManageCourses.jsx";
+import ManageProfessors from "./pages/admin/ManageProfessors.jsx";
+import ManageDepartments from "./pages/admin/ManageDepartments.jsx";
 
 function App() {
   return (
@@ -26,6 +30,10 @@ function App() {
           <Route path="/departments/:code" element={<DepartmentCourses />} />
           <Route path="/professors" element={<Professors />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
+          <Route path="/admin" element={<AdminControls />} />
+          <Route path="/admin/courses" element={<ManageCourses />} />
+          <Route path="/admin/professors" element={<ManageProfessors />} />
+          <Route path="/admin/departments" element={<ManageDepartments />} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -24,8 +24,7 @@ export default function Layout({ children }) {
           <h1
             className="text-xl font-bold text-blue-700 cursor-pointer"
             onClick={() => navigate("/")}
-          >
-          </h1>
+          ></h1>
 
           {/* Conditionally render nav buttons */}
           {!isLandingPage && (
@@ -42,6 +41,14 @@ export default function Layout({ children }) {
               >
                 Professors
               </button>
+              {user?.role === "admin" && (
+                <button
+                  onClick={() => navigate("/admin")}
+                  className="text-sm px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+                >
+                  Admin
+                </button>
+              )}
             </>
           )}
         </div>
