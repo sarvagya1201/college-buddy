@@ -15,7 +15,7 @@ export default function Login() {
 
     const res = await login(email, password);
     if (res.success) {
-      navigate("/home");
+      navigate("/");
     } else {
       const err = res.error;
       if (err === "User not found") setMsg("User doesn’t exist");
