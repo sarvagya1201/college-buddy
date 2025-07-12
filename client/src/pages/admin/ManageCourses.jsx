@@ -9,13 +9,17 @@ export default function ManageCourses() {
   const [departments, setDepartments] = useState([]);
   const [professors, setProfessors] = useState([]);
 
-  // Form fields
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [departmentCode, setDepartmentCode] = useState("");
   const [professorEmail, setProfessorEmail] = useState("");
   const [courseType, setCourseType] = useState("");
   const [offeredIn, setOfferedIn] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortKey, setSortKey] = useState("name");
+  const [filterDept, setFilterDept] = useState("");
+  const [filterSemester, setFilterSemester] = useState("");
 
   useEffect(() => {
     fetchCourses();
@@ -48,15 +52,12 @@ export default function ManageCourses() {
         courseType,
         offeredIn,
       });
-
-      // Reset form
       setName("");
       setCode("");
       setDepartmentCode("");
       setProfessorEmail("");
       setCourseType("");
       setOfferedIn([]);
-
       fetchCourses();
     } catch (err) {
       console.error("Failed to add course", err);
@@ -78,6 +79,20 @@ export default function ManageCourses() {
     );
   };
 
+  const filteredCourses = courses
+    .filter(
+      (course) =>
+        course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        course.code.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((c) => (filterDept ? c.department.code === filterDept : true))
+    .filter((c) => (filterSemester ? c.offeredIn.includes(filterSemester) : true))
+    .sort((a, b) => {
+      if (sortKey === "name") return a.name.localeCompare(b.name);
+      if (sortKey === "rating") return (b.ratings?.overall || 0) - (a.ratings?.overall || 0);
+      return 0;
+    });
+
   if (!user || user.role !== "admin") {
     return (
       <Layout>
@@ -90,7 +105,7 @@ export default function ManageCourses() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold text-blue-700 mb-4">Manage Courses</h1>
 
         {/* Add Course Form */}
@@ -164,30 +179,85 @@ export default function ManageCourses() {
           </button>
         </div>
 
-        {/* Existing Courses List */}
-        <ul className="space-y-3">
-          {courses.map((course) => (
-            <li
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4 mb-6 items-center">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by name/code"
+            className="border p-2 rounded w-48"
+          />
+          <select
+            value={filterDept}
+            onChange={(e) => setFilterDept(e.target.value)}
+            className="border p-2 rounded"
+          >
+            <option value="">All Departments</option>
+            {departments.map((dept) => (
+              <option key={dept.code} value={dept.code}>
+                {dept.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={filterSemester}
+            onChange={(e) => setFilterSemester(e.target.value)}
+            className="border p-2 rounded"
+          >
+            <option value="">All Semesters</option>
+            <option value="monsoon">Monsoon</option>
+            <option value="winter">Winter</option>
+          </select>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value)}
+            className="border p-2 rounded"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="rating">Sort by Rating</option>
+          </select>
+        </div>
+
+        {/* Course Cards */}
+        <div className="flex flex-wrap gap-4">
+          {filteredCourses.map((course) => (
+            <div
               key={course.id}
-              className="bg-white p-4 rounded shadow flex justify-between items-center"
+              className="bg-white w-full md:w-[48%] lg:w-[32%] p-4 rounded shadow border border-gray-200 flex flex-col justify-between"
             >
               <div>
-                <p className="font-bold text-blue-700">
+                <h3 className="text-lg font-bold text-blue-700 mb-1">
                   {course.name} ({course.code})
+                </h3>
+                <p className="text-sm text-gray-700 mb-1">
+                  Type: {course.courseType} | Sem: {course.offeredIn.join(", ")}
                 </p>
-                <p className="text-sm text-gray-600">
-                  {course.courseType} • {course.offeredIn?.join(", ")}
+                <p className="text-sm text-gray-700 mb-1">
+                  Dept: {course.department?.name}
                 </p>
+                <p className="text-sm text-gray-700 mb-1">
+                  Prof: {course.professor?.name}
+                </p>
+                {course.ratings && (
+                  <div className="text-xs text-gray-600 mt-2 space-y-1">
+                    <p>Overall: {course.ratings.overall.toFixed(2)}</p>
+                    <p>Attendance: {course.ratings.attendance.toFixed(2)}</p>
+                    <p>Grading: {course.ratings.grading.toFixed(2)}</p>
+                    <p>Material: {course.ratings.material.toFixed(2)}</p>
+                    <p>Professor: {course.ratings.prof.toFixed(2)}</p>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => handleDelete(course.id)}
-                className="text-red-600 hover:underline"
+                className="mt-3 self-end text-red-600 hover:underline text-sm"
               >
                 Delete
               </button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </Layout>
   );

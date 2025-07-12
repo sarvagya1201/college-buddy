@@ -20,6 +20,34 @@ export const createDepartment = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+// UPDATE department
+export const updateDepartment = async (req, res) => {
+  const { id } = req.params;
+  const { name, code } = req.body;
+
+  try {
+    const updated = await prisma.department.update({
+      where: { id },
+      data: { name, code },
+    });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error updating department" });
+  }
+};
+// DELETE department
+export const deleteDepartment = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.department.delete({ where: { id } });
+    res.json({ message: "Department deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error deleting department" });
+  }
+};
 export const getAllDepartments = async (req, res) => {
   try {
     const departments = await prisma.department.findMany();

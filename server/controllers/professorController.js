@@ -38,3 +38,32 @@ export const getAllProfessors = async (req, res) => {
     res.status(500).json({ error: "Error fetching professors" });
   }
 };
+// UPDATE professor
+export const updateProfessor = async (req, res) => {
+  const { id } = req.params;
+  const { name, email } = req.body;
+
+  try {
+    const updated = await prisma.professor.update({
+      where: { id },
+      data: { name, email },
+    });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error updating professor" });
+  }
+};
+
+// DELETE professor
+export const deleteProfessor = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.professor.delete({ where: { id } });
+    res.json({ message: "Professor deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error deleting professor" });
+  }
+};

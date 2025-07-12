@@ -207,3 +207,59 @@ export const getCourseDetails = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+// PUT /api/courses/:id
+export const updateCourse = async (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    code,
+    departmentCode,
+    professorEmail,
+    courseType,
+    offeredIn,
+  } = req.body;
+
+  try {
+    const department = await prisma.department.findUnique({
+      where: { code: departmentCode },
+    });
+    if (!department) return res.status(404).json({ error: "Dept not found" });
+
+    const professor = await prisma.professor.findUnique({
+      where: { email: professorEmail },
+    });
+    if (!professor) return res.status(404).json({ error: "Prof not found" });
+
+    const course = await prisma.course.update({
+      where: { id },
+      data: {
+        name,
+        code,
+        courseType,
+        offeredIn,
+        departmentId: department.id,
+        professorId: professor.id,
+      },
+    });
+
+    res.status(200).json(course);
+  } catch (err) {
+    console.error("Error updating course:", err);
+    res.status(500).json({ error: "Error updating course" });
+  }
+};
+// DELETE /api/courses/:id
+export const deleteCourse = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.course.delete({
+      where: { id },
+    });
+
+    res.status(204).send(); // No content
+  } catch (err) {
+    console.error("Error deleting course:", err);
+    res.status(500).json({ error: "Error deleting course" });
+  }
+};
