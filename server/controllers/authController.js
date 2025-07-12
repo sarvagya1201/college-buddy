@@ -25,12 +25,10 @@ export const register = async (req, res) => {
       },
     });
 
-    res
-      .status(201)
-      .json({
-        message: "User registered successfully",
-        user: { id: user.id, name: user.name, email: user.email },
-      });
+    res.status(201).json({
+      message: "User registered successfully",
+      user: { id: user.id, name: user.name, email: user.email },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Registration failed" });
@@ -44,7 +42,7 @@ export const login = async (req, res) => {
   try {
     // Get JWT_SECRET inside the function where it's needed
     const JWT_SECRET = process.env.JWT_SECRET;
-    
+
     if (!JWT_SECRET) {
       console.error("JWT_SECRET is not defined in environment variables!");
       return res.status(500).json({ error: "Server configuration error" });
@@ -65,8 +63,8 @@ export const login = async (req, res) => {
     res
       .cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Lax",
+        secure: true, // required for cross-site cookies
+        sameSite: "None", // required for cross-site cookies
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       })
       .json({ message: "Login successful" });
