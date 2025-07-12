@@ -87,6 +87,24 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+{/* Add a Review Tile */}
+<div className="flex justify-center mb-4">
+  <motion.div
+    custom={2.5}
+    initial="hidden"
+    animate="visible"
+    variants={fadeIn}
+    className="w-full max-w-sm"
+  >
+    <Link
+      to="/select-review-course"
+      className="block px-4 py-3 bg-white/30 hover:bg-white/50 text-blue-800 font-semibold rounded-xl border border-white/40 shadow transition text-center"
+    >
+      Add a Review
+    </Link>
+  </motion.div>
+</div>
+
 
           {/* Centered Admin Card */}
           {user?.role === "admin" && (

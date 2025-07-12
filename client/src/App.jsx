@@ -15,6 +15,9 @@ import AdminControls from "./pages/admin/AdminControls.jsx";
 import ManageCourses from "./pages/admin/ManageCourses.jsx";
 import ManageProfessors from "./pages/admin/ManageProfessors.jsx";
 import ManageDepartments from "./pages/admin/ManageDepartments.jsx";
+import AddReviewPage from "./pages/AddReviewPage";
+import SelectReviewCourse from "./pages/SelectReviewCourse";
+import MyReviews from "./pages/MyReviews";
 
 function App() {
   return (
@@ -34,6 +37,9 @@ function App() {
           <Route path="/admin/courses" element={<ManageCourses />} />
           <Route path="/admin/professors" element={<ManageProfessors />} />
           <Route path="/admin/departments" element={<ManageDepartments />} />
+          <Route path="/courses/:id/add-review" element={<AddReviewPage />} />
+          <Route path="/select-review-course" element={<SelectReviewCourse />} />
+          <Route path="/my-reviews" element={<MyReviews />} />
         </Routes>
       </Router>
     </AuthProvider>
