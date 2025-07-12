@@ -57,4 +57,33 @@ export const getAllDepartments = async (req, res) => {
     res.status(500).json({ error: "Error fetching departments" });
   }
 };
+// GET /api/departments/:code/courses
+export const getCoursesByDepartmentCode = async (req, res) => {
+  const { code } = req.params;
+
+  try {
+    const department = await prisma.department.findUnique({
+      where: { code },
+    });
+
+    if (!department) {
+      return res.status(404).json({ error: "Department not found" });
+    }
+
+    const courses = await prisma.course.findMany({
+      where: { departmentId: department.id },
+      select: {
+        id: true,
+        name: true,
+        code: true,
+      },
+    });
+
+    res.json(courses);
+  } catch (err) {
+    console.error("Error fetching courses by department code:", err);
+    res.status(500).json({ error: "Error fetching courses" });
+  }
+};
+
 
