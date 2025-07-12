@@ -24,7 +24,9 @@ app.use(
 app.use(cookieParser());
 app.use("/api/notes", noteRoutes);
 app.use(express.json());
-
+app.get("/", (req, res) => {
+  res.send("✅ College Buddy Backend is running!");
+});
 app.use("/api/courses", courseRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes); // or "/api/protected"
