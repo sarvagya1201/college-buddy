@@ -1,6 +1,32 @@
-import  prisma  from "../models/prismaClient.js";
+// controllers/reviewController.js
+import prisma from "../models/prismaClient.js";
 
 // POST /api/reviews/:courseId
+// GET /api/reviews/me
+export const getMyReviews = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const reviews = await prisma.review.findMany({
+      where: { userId },
+      include: {
+        course: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(reviews);
+  } catch (err) {
+    console.error("Error fetching user reviews:", err);
+    res.status(500).json({ error: "Failed to fetch your reviews" });
+  }
+};
+
 export const addOrUpdateReview = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -11,12 +37,8 @@ export const addOrUpdateReview = async (req, res) => {
       gradingRating,
       attendanceRating,
       profRating,
+      overallRating,
     } = req.body;
-
-    const overallRating = (
-      (materialRating + gradingRating + attendanceRating + profRating) /
-      4
-    ).toFixed(1);
 
     const existing = await prisma.review.findUnique({
       where: { userId_courseId: { userId, courseId } },
@@ -31,7 +53,7 @@ export const addOrUpdateReview = async (req, res) => {
             gradingRating,
             attendanceRating,
             profRating,
-            overallRating: parseFloat(overallRating),
+            overallRating,
           },
         })
       : await prisma.review.create({
@@ -43,7 +65,7 @@ export const addOrUpdateReview = async (req, res) => {
             gradingRating,
             attendanceRating,
             profRating,
-            overallRating: parseFloat(overallRating),
+            overallRating,
           },
         });
 
@@ -66,8 +88,9 @@ export const deleteReview = async (req, res) => {
     }
 
     await prisma.review.delete({ where: { id: req.params.reviewId } });
-    res.json({ message: "Review deleted" });
+    res.json({ message: "Review deleted successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error deleting review" });
   }
 };

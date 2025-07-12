@@ -1,24 +1,39 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+// src/pages/CourseDetail.jsx
+import { useContext, useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import Layout from "../components/Layout";
 import StarRating from "../components/StarRating";
+import { AuthContext } from "../context/authContext";
 
 export default function CourseDetail() {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const fetchCourse = async () => {
+    try {
+      const res = await api.get(`/courses/${id}`);
+      setCourse(res.data);
+    } catch (err) {
+      console.error("Failed to load course details", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        const res = await api.get(`/courses/${id}`);
-        setCourse(res.data);
-      } catch (err) {
-        console.error("Failed to load course details", err);
-      }
-    };
     fetchCourse();
   }, [id]);
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await api.delete(`/reviews/${reviewId}`);
+      fetchCourse(); // Refresh after delete
+    } catch (err) {
+      alert("Failed to delete review.");
+      console.error(err);
+    }
+  };
 
   if (!course) return <Layout>Loading...</Layout>;
 
@@ -75,6 +90,7 @@ export default function CourseDetail() {
             </ul>
           </div>
         )}
+
         {/* Reviews */}
         {course.reviews?.length > 0 ? (
           <div className="mt-10">
@@ -106,6 +122,16 @@ export default function CourseDetail() {
                       {new Date(review.createdAt).toLocaleDateString()}
                     </li>
                   </ul>
+
+                  {/* ✅ Show delete button if it's the current user's review */}
+                  {user?.id === review.userId && (
+                    <button
+                      onClick={() => handleDeleteReview(review.id)}
+                      className="mt-3 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                      Delete Review
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -114,8 +140,20 @@ export default function CourseDetail() {
           <p className="text-gray-500 mt-8">No reviews submitted yet.</p>
         )}
 
-        {/* Notes */}
-        <div>
+        {/* Add Review Button */}
+        {user && (
+          <div className="mt-6">
+            <button
+              onClick={() => navigate(`/courses/${id}/add-review`)}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Add Your Review
+            </button>
+          </div>
+        )}
+
+        {/* Notes Section */}
+        <div className="mt-12">
           <h2 className="text-xl font-semibold mb-2">Notes</h2>
           {course.notes?.length > 0 ? (
             <div className="space-y-3">
