@@ -14,10 +14,12 @@ import noteRoutes from "./routes/noteRoutes.js";
 // Remove dotenv.config() from here since it's now in index.js
 const app = express();
 
+dotenv.config();
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend origin
-    credentials: true, // allow sending cookies
+    origin: process.env.CORS_ORIGIN, // just one origin
+    credentials: true,
   })
 );
 
