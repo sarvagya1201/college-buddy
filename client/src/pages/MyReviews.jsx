@@ -8,6 +8,10 @@ export default function MyReviews() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = () => {
     api.get("/reviews/me")
       .then((res) => {
         setReviews(res.data);
@@ -17,7 +21,20 @@ export default function MyReviews() {
         console.error("Failed to fetch reviews", err);
         setLoading(false);
       });
-  }, []);
+  };
+
+  const handleDelete = async (reviewId) => {
+    const confirmed = window.confirm("Are you sure you want to delete this review?");
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/reviews/${reviewId}`);
+      setReviews((prev) => prev.filter((review) => review.id !== reviewId));
+    } catch (err) {
+      console.error("Failed to delete review", err);
+      alert("Failed to delete the review. Please try again.");
+    }
+  };
 
   if (loading) return <Layout>Loading your reviews...</Layout>;
 
@@ -44,13 +61,19 @@ export default function MyReviews() {
                   <li><strong>Professor:</strong> {review.profRating}/10</li>
                   <li><strong>Submitted:</strong> {new Date(review.createdAt).toLocaleDateString()}</li>
                 </ul>
-                <div className="mt-2">
+                <div className="mt-2 flex items-center gap-4">
                   <Link
                     to={`/courses/${review.courseId}/add-review`}
                     className="text-blue-600 hover:underline"
                   >
                     Edit Review
                   </Link>
+                  <button
+                    onClick={() => handleDelete(review.id)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}

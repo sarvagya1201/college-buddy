@@ -12,10 +12,12 @@ export default function AddReviewPage() {
 
   const [course, setCourse] = useState(null);
   const [reviewText, setReviewText] = useState("");
-  const [attendanceRating, setAttendanceRating] = useState(1);
-  const [gradingRating, setGradingRating] = useState(1);
-  const [materialRating, setMaterialRating] = useState(1);
-  const [profRating, setProfRating] = useState(1);
+
+  // Ratings stored as strings for input flexibility
+  const [attendanceRating, setAttendanceRating] = useState("");
+  const [gradingRating, setGradingRating] = useState("");
+  const [materialRating, setMaterialRating] = useState("");
+  const [profRating, setProfRating] = useState("");
   const [error, setError] = useState("");
 
   const fetchCourse = async () => {
@@ -32,21 +34,34 @@ export default function AddReviewPage() {
   }, [id]);
 
   const computeOverallRating = () => {
-    return (
-      (attendanceRating + gradingRating + materialRating + profRating) / 4
-    );
+    const total =
+      Number(attendanceRating) +
+      Number(gradingRating) +
+      Number(materialRating) +
+      Number(profRating);
+    return total / 4;
   };
 
   const handleSubmit = async () => {
+    if (
+      !attendanceRating ||
+      !gradingRating ||
+      !materialRating ||
+      !profRating
+    ) {
+      setError("Please provide all ratings before submitting.");
+      return;
+    }
+
     try {
       const overallRating = computeOverallRating();
 
       await api.post(`/reviews/${id}`, {
         reviewText,
-        attendanceRating,
-        gradingRating,
-        materialRating,
-        profRating,
+        attendanceRating: Number(attendanceRating),
+        gradingRating: Number(gradingRating),
+        materialRating: Number(materialRating),
+        profRating: Number(profRating),
         overallRating: parseFloat(overallRating.toFixed(1)),
       });
 
@@ -63,6 +78,21 @@ export default function AddReviewPage() {
         console.error(err);
       }
     }
+  };
+
+  // Handlers to allow deletion and restrict 1–5 input only
+  const handleRatingChange = (setter) => (e) => {
+    const val = e.target.value;
+    if (val === "" || /^[1-5]$/.test(val)) {
+      setter(val);
+    }
+  };
+
+  const handleRatingBlur = (setter) => (e) => {
+    let val = parseInt(e.target.value);
+    if (isNaN(val) || val < 1) val = 1;
+    else if (val > 5) val = 5;
+    setter(val.toString());
   };
 
   if (!user) {
@@ -100,51 +130,51 @@ export default function AddReviewPage() {
 
         <div className="grid gap-3 mb-4">
           <div>
-            <label className="block mb-1 font-medium">Attendance Rating (1–10)</label>
+            <label className="block mb-1 font-medium">Attendance Rating (1–5)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[1-5]"
               value={attendanceRating}
-              onChange={(e) => setAttendanceRating(Number(e.target.value))}
+              onChange={handleRatingChange(setAttendanceRating)}
+              onBlur={handleRatingBlur(setAttendanceRating)}
               className="border p-2 rounded w-full"
-              min={1}
-              max={10}
-              step="1"
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Grading Rating (1–10)</label>
+            <label className="block mb-1 font-medium">Grading Rating (1–5)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[1-5]"
               value={gradingRating}
-              onChange={(e) => setGradingRating(Number(e.target.value))}
+              onChange={handleRatingChange(setGradingRating)}
+              onBlur={handleRatingBlur(setGradingRating)}
               className="border p-2 rounded w-full"
-              min={1}
-              max={10}
-              step="1"
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Material Rating (1–10)</label>
+            <label className="block mb-1 font-medium">Material Rating (1–5)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[1-5]"
               value={materialRating}
-              onChange={(e) => setMaterialRating(Number(e.target.value))}
+              onChange={handleRatingChange(setMaterialRating)}
+              onBlur={handleRatingBlur(setMaterialRating)}
               className="border p-2 rounded w-full"
-              min={1}
-              max={10}
-              step="1"
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Professor Rating (1–10)</label>
+            <label className="block mb-1 font-medium">Professor Rating (1–5)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[1-5]"
               value={profRating}
-              onChange={(e) => setProfRating(Number(e.target.value))}
+              onChange={handleRatingChange(setProfRating)}
+              onBlur={handleRatingBlur(setProfRating)}
               className="border p-2 rounded w-full"
-              min={1}
-              max={10}
-              step="1"
             />
           </div>
         </div>

@@ -12,6 +12,9 @@ export default function CourseDetail() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState(null);
+
   const fetchCourse = async () => {
     try {
       const res = await api.get(`/courses/${id}`);
@@ -25,10 +28,17 @@ export default function CourseDetail() {
     fetchCourse();
   }, [id]);
 
-  const handleDeleteReview = async (reviewId) => {
+  const confirmDelete = (reviewId) => {
+    setReviewToDelete(reviewId);
+    setShowConfirm(true);
+  };
+
+  const proceedDelete = async () => {
     try {
-      await api.delete(`/reviews/${reviewId}`);
-      fetchCourse(); // Refresh after delete
+      await api.delete(`/reviews/${reviewToDelete}`);
+      setShowConfirm(false);
+      setReviewToDelete(null);
+      fetchCourse(); // Refresh reviews
     } catch (err) {
       alert("Failed to delete review.");
       console.error(err);
@@ -123,10 +133,9 @@ export default function CourseDetail() {
                     </li>
                   </ul>
 
-                  {/* ✅ Show delete button if it's the current user's review */}
-                  {user?.id === review.userId && (
+                  {(user?.id === review.userId || user?.role === "admin") && (
                     <button
-                      onClick={() => handleDeleteReview(review.id)}
+                      onClick={() => confirmDelete(review.id)}
                       className="mt-3 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                     >
                       Delete Review
@@ -194,6 +203,32 @@ export default function CourseDetail() {
           )}
         </div>
       </div>
+
+      {/* 🔴 Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-80 text-center">
+            <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete this review?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={proceedDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
