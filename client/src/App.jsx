@@ -18,6 +18,13 @@ import ManageDepartments from "./pages/admin/ManageDepartments.jsx";
 import AddReviewPage from "./pages/AddReviewPage";
 import SelectReviewCourse from "./pages/SelectReviewCourse";
 import MyReviews from "./pages/MyReviews";
+import About from "./pages/info/AboutUs.jsx";
+import ContactUs from "./pages/info/ContactUs.jsx";
+import Pricing from "./pages/info/Pricing.jsx";
+import PrivacyPolicy from "./pages/info/PrivacyPolicy.jsx";
+import TermsAndConditions from "./pages/info/Terms&Conditions.jsx";
+import RefundPolicy from "./pages/info/CancellationRefundPolicy.jsx";
+
 
 function App() {
   return (
@@ -39,7 +46,14 @@ function App() {
           <Route path="/admin/departments" element={<ManageDepartments />} />
           <Route path="/courses/:id/add-review" element={<AddReviewPage />} />
           <Route path="/select-review-course" element={<SelectReviewCourse />} />
+          <Route path="/about-us" element={<About />} />
           <Route path="/my-reviews" element={<MyReviews />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
+
         </Routes>
       </Router>
     </AuthProvider>

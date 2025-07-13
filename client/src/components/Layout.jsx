@@ -96,8 +96,32 @@ export default function Layout({ children }) {
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="text-center text-sm font-medium text-gray-600 py-4 bg-white border-t">
-        © {new Date().getFullYear()} Built with ❤️ by Bala & Sarvagya
+      <footer className="text-sm text-gray-700 bg-white border-t mt-6">
+        <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-center md:text-left">
+            © {new Date().getFullYear()} Built with ❤️ by Bala & Sarvagya
+          </div>
+          <div className="flex flex-wrap justify-center gap-4">
+            <a href="/about-us" className="hover:underline">
+              About
+            </a>
+            <a href="/contact" className="hover:underline">
+              Contact
+            </a>
+            <a href="/pricing" className="hover:underline">
+              Pricing
+            </a>
+            <a href="/privacy-policy" className="hover:underline">
+              Privacy Policy
+            </a>
+            <a href="/terms" className="hover:underline">
+              Terms & Conditions
+            </a>
+            <a href="/refund-policy" className="hover:underline">
+              Refund Policy
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );
