@@ -79,34 +79,34 @@ export const uploadDataFromExcel = async (req, res) => {
       }
 
       // 1. Upsert Department
-// First check: Does any department exist with this name OR code?
-let department = await prisma.department.findFirst({
-  where: {
-    OR: [
-      { name: departmentName },
-      { code: departmentCode.toLowerCase() }
-    ]
-  }
-});
+      // First check: Does any department exist with this name OR code?
+      let department = await prisma.department.findFirst({
+        where: {
+          OR: [
+            { name: departmentName },
+            { code: departmentCode.toLowerCase() }
+          ]
+        }
+      });
 
-if (department) {
-  // Optional: update name or code if needed (e.g., normalization)
-  department = await prisma.department.update({
-    where: { id: department.id },
-    data: {
-      name: departmentName,
-      code: departmentCode.toLowerCase()
-    }
-  });
-} else {
-  // Safe to create since both are unique
-  department = await prisma.department.create({
-    data: {
-      name: departmentName,
-      code: departmentCode.toLowerCase()
-    }
-  });
-}
+      if (department) {
+        // Optional: update name or code if needed (e.g., normalization)
+        department = await prisma.department.update({
+          where: { id: department.id },
+          data: {
+            name: departmentName,
+            code: departmentCode.toLowerCase()
+          }
+        });
+      } else {
+        // Safe to create since both are unique
+        department = await prisma.department.create({
+          data: {
+            name: departmentName,
+            code: departmentCode.toLowerCase()
+          }
+        });
+      }
 
 
       // 2. Upsert Professor

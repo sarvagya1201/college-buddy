@@ -9,7 +9,7 @@ import cookieParser from "cookie-parser";
 import departmentRoutes from "./routes/departmentRoutes.js";
 import professorRoutes from "./routes/professorRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
-import noteRoutes from "./routes/noteRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import healthRoute from "./routes/healthRoutes.js";
 
 // Remove dotenv.config() from here since it's now in index.js
@@ -36,6 +36,5 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/professors", professorRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/health", healthRoute);
-
-
+app.use("/api/upload", uploadRoutes);
 export default app;
