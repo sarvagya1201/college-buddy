@@ -195,7 +195,7 @@ export default function CourseDetail() {
                   formData.append("courseId", course.id);
 
                   try {
-                    await api.post("/notes/upload", formData, {
+                    await api.post("/upload/notes", formData, {
                       headers: { "Content-Type": "multipart/form-data" },
                     });
                     form.reset();
