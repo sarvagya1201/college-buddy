@@ -14,6 +14,7 @@ export default function CourseDetail() {
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState("");
 
   const fetchCourse = async () => {
     try {
@@ -27,6 +28,11 @@ export default function CourseDetail() {
   useEffect(() => {
     fetchCourse();
   }, [id]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFileName(file ? file.name : "");
+  };
 
   const confirmDelete = (reviewId) => {
     setReviewToDelete(reviewId);
@@ -63,40 +69,16 @@ export default function CourseDetail() {
           Professor: {course.professor?.name} ({course.professor?.email})
         </p>
 
+        {/* Ratings */}
         {course.ratings && (
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-2">Average Ratings</h2>
             <ul className="text-sm space-y-2">
-              {course.ratings.overall !== undefined && (
-                <li className="flex items-center gap-2">
-                  Overall: {course.ratings.overall.toFixed(2)}
-                  <StarRating value={course.ratings.overall} />
+              {Object.entries(course.ratings).map(([key, value]) => (
+                <li key={key} className="flex items-center gap-2 capitalize">
+                  {key}: {value.toFixed(2)} <StarRating value={value} />
                 </li>
-              )}
-              {course.ratings.attendance !== undefined && (
-                <li className="flex items-center gap-2">
-                  Attendance: {course.ratings.attendance.toFixed(2)}
-                  <StarRating value={course.ratings.attendance} />
-                </li>
-              )}
-              {course.ratings.grading !== undefined && (
-                <li className="flex items-center gap-2">
-                  Grading: {course.ratings.grading.toFixed(2)}
-                  <StarRating value={course.ratings.grading} />
-                </li>
-              )}
-              {course.ratings.material !== undefined && (
-                <li className="flex items-center gap-2">
-                  Material: {course.ratings.material.toFixed(2)}
-                  <StarRating value={course.ratings.material} />
-                </li>
-              )}
-              {course.ratings.prof !== undefined && (
-                <li className="flex items-center gap-2">
-                  Professor: {course.ratings.prof.toFixed(2)}
-                  <StarRating value={course.ratings.prof} />
-                </li>
-              )}
+              ))}
             </ul>
           </div>
         )}
@@ -112,25 +94,12 @@ export default function CourseDetail() {
                     "{review.reviewText}"
                   </p>
                   <ul className="text-sm text-gray-700 grid grid-cols-2 gap-x-4">
-                    <li>
-                      <strong>Overall:</strong> {review.overallRating}/5
-                    </li>
-                    <li>
-                      <strong>Attendance:</strong> {review.attendanceRating}/5
-                    </li>
-                    <li>
-                      <strong>Grading:</strong> {review.gradingRating}/5
-                    </li>
-                    <li>
-                      <strong>Material:</strong> {review.materialRating}/5
-                    </li>
-                    <li>
-                      <strong>Professor:</strong> {review.profRating}/5
-                    </li>
-                    <li>
-                      <strong>Date:</strong>{" "}
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </li>
+                    <li><strong>Overall:</strong> {review.overallRating}/5</li>
+                    <li><strong>Attendance:</strong> {review.attendanceRating}/5</li>
+                    <li><strong>Grading:</strong> {review.gradingRating}/5</li>
+                    <li><strong>Material:</strong> {review.materialRating}/5</li>
+                    <li><strong>Professor:</strong> {review.profRating}/5</li>
+                    <li><strong>Date:</strong> {new Date(review.createdAt).toLocaleDateString()}</li>
                   </ul>
 
                   {(user?.id === review.userId || user?.role === "admin") && (
@@ -164,6 +133,8 @@ export default function CourseDetail() {
         {/* Notes Section */}
         <div className="mt-12">
           <h2 className="text-xl font-semibold mb-2">Notes</h2>
+
+          {/* Existing Notes */}
           {course.notes?.length > 0 ? (
             <div className="space-y-3">
               {course.notes.map((note) => (
@@ -201,17 +172,89 @@ export default function CourseDetail() {
           ) : (
             <p className="text-gray-500">No notes uploaded yet.</p>
           )}
+
+          {/* Upload New Note Form */}
+          {user && (
+            <div className="mt-8 border-t pt-6">
+              <h3 className="text-lg font-semibold mb-2 text-blue-700">Upload New Note</h3>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target;
+                  const title = form.title.value;
+                  const file = form.file.files[0];
+
+                  if (!title || !file) {
+                    alert("Please provide a title and select a file.");
+                    return;
+                  }
+
+                  const formData = new FormData();
+                  formData.append("title", title);
+                  formData.append("file", file);
+                  formData.append("courseId", course.id);
+
+                  try {
+                    await api.post("/notes/upload", formData, {
+                      headers: { "Content-Type": "multipart/form-data" },
+                    });
+                    form.reset();
+                    setSelectedFileName("");
+                    fetchCourse(); // refresh notes
+                  } catch (err) {
+                    console.error("Upload failed", err);
+                    alert("Upload failed.");
+                  }
+                }}
+                className="space-y-4"
+              >
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Note Title"
+                  className="w-full border p-2 rounded"
+                  required
+                />
+
+                <div>
+                  <input
+                    type="file"
+                    name="file"
+                    id="fileInput"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.zip"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    required
+                  />
+                  <label
+                    htmlFor="fileInput"
+                    className="inline-block px-4 py-2 bg-gray-200 text-gray-800 rounded cursor-pointer hover:bg-gray-300"
+                  >
+                    Choose File
+                  </label>
+                  {selectedFileName && (
+                    <span className="ml-3 text-sm text-gray-700">{selectedFileName}</span>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Upload
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 🔴 Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-80 text-center">
             <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
-            <p className="text-gray-700 mb-6">
-              Are you sure you want to delete this review?
-            </p>
+            <p className="text-gray-700 mb-6">Are you sure you want to delete this review?</p>
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowConfirm(false)}
